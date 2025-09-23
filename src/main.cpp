@@ -30,44 +30,83 @@ int main(int argc, char* argv[]) {
     int height, width;
     getmaxyx(stdscr, height, width);
 
-    WINDOW* status = newwin(1, width, 0, 0);
-    WINDOW* text   = newwin(height - 1, width, 1, 0);
+    WINDOW* header = newwin(1, width, 0, 0);
+    WINDOW* text   = newwin(height - 2, width, 1, 0);
+    WINDOW* footer = newwin(1, width, height - 1, 0);
+    keypad(text, TRUE);
 
-    int cursor_y = 0, cursor_x = 0;
+    int cursor_y = 0, cursor_x = 0, scroll_offset = 0, desired_x = 0;
+    int text_height = height - 2;
 
     bool running = true;
     while(running) {
-        // --- Draw status bar ---
-        wattron(status, A_REVERSE);
-        mvwprintw(status, 0, 0, "Editing: %s | Cursor: %d,%d", filename.c_str(), cursor_y, cursor_x);
-        wattroff(status, A_REVERSE);
-        wrefresh(status);
+        // HEADER WINDOW
+        werase(header);
+        wattron(header, A_REVERSE);
+        mvwprintw(header, 0, 0, "Editing: %s", filename.c_str());
+        wattroff(header, A_REVERSE);
+        wrefresh(header);
 
-        // --- Draw text ---
+        // FOOTER WINDOW
+        werase(footer);
+        wattron(footer, A_REVERSE);
+        mvwprintw(footer, 0, 0, "LINE: %d / %lu", scroll_offset + cursor_y + 1, lines.size());
+        wattroff(footer, A_REVERSE);
+        wrefresh(footer);
+
+        // TEXT WINDOW (middle)
         werase(text);
-        for(int i = 0; i < height - 1 && i < (int)lines.size(); i++) {
-            mvwprintw(text, i, 0, "%s", lines[i].c_str());
+        for(int i = 0; i < text_height; i++) {
+            int line_index = scroll_offset + i;
+            if(line_index >= (int)lines.size())
+                break;
+            mvwprintw(text, i, 0, "%s", lines[line_index].c_str());
         }
+        
+        // cursor
+        int line_index = scroll_offset + cursor_y;
+        if(line_index < (int)lines.size()) {
+            int line_len = lines[line_index].size();
+            cursor_x = (desired_x <= line_len) ? desired_x : line_len;
+        } else {
+            cursor_x = 0;
+        }
+        
+        if(cursor_y >= text_height)
+            cursor_y = text_height - 1;
 
-        // --- Move cursor ---
-        if(cursor_y >= height - 1) cursor_y = height - 2;   // prevent overflow
-        if(cursor_x >= width) cursor_x = width - 1;
         wmove(text, cursor_y, cursor_x);
         wrefresh(text);
 
-        // --- Input ---
+        // input
         int ch = wgetch(text);
         switch(ch) {
-            case KEY_UP:    if(cursor_y > 0) cursor_y--; break;
-            case KEY_DOWN:  if(cursor_y < height - 2) cursor_y++; break;
+            case KEY_UP:    {
+                if(cursor_y > 0)
+                    cursor_y--;
+                else if(scroll_offset > 0)
+                    scroll_offset--;
+                break;
+            }
+            case KEY_DOWN: {
+                if(cursor_y < text_height - 1 && scroll_offset + cursor_y + 1 < (int)lines.size())
+                    cursor_y++;
+                else if(scroll_offset + text_height < (int)lines.size())
+                    scroll_offset++;
+                break;
+            }
             case KEY_LEFT:  if(cursor_x > 0) cursor_x--; break;
-            case KEY_RIGHT: if(cursor_x < width - 1) cursor_x++; break;
+            case KEY_RIGHT: cursor_x++; break;
             case 'q': running = false; break;
         }
+
+        desired_x = cursor_x;
     }
 
     delwin(text);
-    delwin(status);
+    delwin(header);
+    delwin(footer);
     endwin();
+    
     return 0;
 }
