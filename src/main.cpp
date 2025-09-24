@@ -86,6 +86,7 @@ int main(int argc, char* argv[]) {
                     cursor_y--;
                 else if(scroll_offset > 0)
                     scroll_offset--;
+                
                 break;
             }
             case KEY_DOWN: {
@@ -93,10 +94,45 @@ int main(int argc, char* argv[]) {
                     cursor_y++;
                 else if(scroll_offset + text_height < (int)lines.size())
                     scroll_offset++;
+                
                 break;
             }
-            case KEY_LEFT:  if(cursor_x > 0) cursor_x--; break;
-            case KEY_RIGHT: cursor_x++; break;
+            case KEY_LEFT: {
+                if(cursor_x > 0)
+                    cursor_x--;
+                else if(scroll_offset + cursor_y > 0) {
+                    if(cursor_y > 0)
+                        cursor_y--;
+                    else
+                        scroll_offset--;
+                    
+                    int prev_line_index = scroll_offset + cursor_y;
+                    if(prev_line_index < (int)lines.size()) {
+                        cursor_x = lines[prev_line_index].size();
+                    } else {
+                        cursor_x = 0;
+                    }
+                }
+
+                break;
+            }
+            case KEY_RIGHT: {
+                int line_index = scroll_offset + cursor_y;
+                if(line_index < (int)lines.size()) {
+                    if(cursor_x < (int)lines[line_index].size())
+                        cursor_x++;
+                    else if(line_index + 1 < (int)lines.size()){
+                        if(cursor_y < text_height - 1) 
+                            cursor_y++;
+                        else
+                            scroll_offset++;
+                        
+                        cursor_x = 0;
+                    }
+                }
+
+                break;
+            }
             case 'q': running = false; break;
         }
 
