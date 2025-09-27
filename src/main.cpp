@@ -5,7 +5,8 @@
 #include "ui.h"
 #include "input.h"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     if(argc < 2) {
         std::printf("Usage: %s <filename>\n", argv[0]);
 
@@ -38,9 +39,6 @@ int main(int argc, char* argv[]) {
 
         // INPUT
         Input::read(Ui::readCh(), running, insertion);
-        
-        // Reset cursor_x
-        Ui::desired_x = Ui::cursor_x;
     }
 
     Ui::clean();

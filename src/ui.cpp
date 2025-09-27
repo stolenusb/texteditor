@@ -4,7 +4,11 @@ WINDOW* header;
 WINDOW* text;
 WINDOW* footer;  
 
-int Ui::text_height = 0, Ui::cursor_y = 0, Ui::cursor_x = 0, Ui::scroll_offset = 0, Ui::desired_x = 0;
+int Ui::text_height = 0, Ui::scroll_offset = 0, Ui::desired_x = 0;
+int Ui::cursor_x = 0, Ui::cursor_y = 0;
+int Ui::select_start_x = 0, Ui::select_start_y = 0;
+int Ui::select_end_x = 0, Ui::select_end_y = 0;
+bool Ui::selecting = false;
 
 void Ui::init()
 {
@@ -71,7 +75,36 @@ void Ui::drawText(std::vector<std::string> &lines)
         int line_index = scroll_offset + i;
         if(line_index >= (int)lines.size())
             break;
-        mvwprintw(text, i, 0, "%s", lines[line_index].c_str());
+        
+        const std::string& line = lines[line_index];
+        
+        for(int j = 0; j < (int)line.size(); j++) {
+            bool in_selection = false;
+            if(selecting) {
+                int start_y = std::min(select_start_y, select_end_y);
+                int end_y = std::max(select_start_y, select_end_y);
+
+                int start_x = std::min(select_start_x, select_start_x);
+                int end_x = std::max(select_start_x, select_end_x);
+            
+                if(line_index > start_y && line_index < end_y)
+                    in_selection = true;
+                else if(line_index == start_y && line_index == end_y && j >= start_x && j < end_x)
+                    in_selection = true;
+                else if(line_index == start_y && line_index < end_y && j >= start_x)
+                    in_selection = true;
+                else if(line_index > start_y && line_index == end_y && j < end_x)
+                    in_selection = true;
+            }
+
+            if(in_selection)
+                wattron(text, A_REVERSE);
+            
+            mvwaddch(text, i, j, line[j]);
+
+            if(in_selection)
+                wattroff(text, A_REVERSE);
+        }
     }
     
     // cursor

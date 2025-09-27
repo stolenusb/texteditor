@@ -2,7 +2,7 @@
 
 SRC = $(wildcard src/*.cpp)
 OBJ = $(patsubst src/%.cpp, build/%.o, $(SRC))
-BIN = texto
+BIN = bin/texto
 LDFLAGS = -lncurses
 CXXFLAGS = -Wall -Wextra -std=c++17 -Isrc/include
 
@@ -17,9 +17,9 @@ build/%.o: src/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 install:
-	@mkdir -p $(PREFIX)/
-	cp $(BIN) $(PREFIX)/texto
-	echo "Installed to $(PREFIX)/texto"
+	@mkdir -p $(PREFIX)/bin
+	cp $(BIN) $(PREFIX)/bin/texto
+	echo "Installed to $(PREFIX)/bin/texto"
 
 clean:
 	rm -rf build/ bin/
