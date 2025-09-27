@@ -83,17 +83,26 @@ void Ui::drawText(std::vector<std::string> &lines)
             if(selecting) {
                 int start_y = std::min(select_start_y, select_end_y);
                 int end_y = std::max(select_start_y, select_end_y);
+                
+                int start_x = 0, end_x = 0;
+                if(start_y == end_y) {
+                    start_x = std::min(select_start_x, select_end_x);
+                    end_x = std::max(select_start_x, select_end_x);
+                } else {
+                    start_x = (start_y == select_start_y) ? select_start_x : select_end_x;
+                    end_x = (end_y == select_end_y) ? select_end_x : select_start_x;
+                }
 
-                int start_x = std::min(select_start_x, select_start_x);
-                int end_x = std::max(select_start_x, select_end_x);
-            
+                start_x = std::max(0, std::min(start_x, (int)line.size()));
+                end_x = std::max(0, std::min(end_x, (int)line.size()));
+                
                 if(line_index > start_y && line_index < end_y)
                     in_selection = true;
                 else if(line_index == start_y && line_index == end_y && j >= start_x && j < end_x)
                     in_selection = true;
-                else if(line_index == start_y && line_index < end_y && j >= start_x)
-                    in_selection = true;
                 else if(line_index > start_y && line_index == end_y && j < end_x)
+                    in_selection = true;
+                else if(line_index == start_y && line_index < end_y && j >= start_x)
                     in_selection = true;
             }
 
