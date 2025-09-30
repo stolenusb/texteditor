@@ -15,8 +15,8 @@ Supports basic operations like opening files, navigating, selecting text.
 
 ## Usage
 ```bash
-./editor myfile.txt
-
+./texto myfile.txt
+```
 Keybindings
 - Arrow keys – move cursor
 - Shift + Arrow keys – select text
