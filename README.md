@@ -25,4 +25,5 @@ Keybindings
 - Ctrl+S – save file (reading mode)
 - Ctrl+W – quit (reading mode)
 
+## Screenshot
 ![Screenshot](screenshot.png)
