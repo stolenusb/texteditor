@@ -24,3 +24,5 @@ Keybindings
 - ESC - reading mode (insertion mode)
 - Ctrl+S – save file (reading mode)
 - Ctrl+W – quit (reading mode)
+
+![Screenshot](screenshot.png)
